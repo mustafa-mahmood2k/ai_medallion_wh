@@ -203,10 +203,11 @@ def ensure_objects() -> None:
         version = master.cursor().execute("SELECT @@VERSION").fetchone()[0]
         print("Connected using configured ODBC driver; SQL Server version verified:")
         print(str(version).splitlines()[0])
-        master.cursor().execute("SELECT DB_ID(?)", db)
-        exists = master.cursor().fetchone()[0]
+        cur = master.cursor()
+        cur.execute("SELECT DB_ID(?)", db)
+        exists = cur.fetchone()[0]
         if exists is None:
-            master.cursor().execute(f"CREATE DATABASE {qi(db)}")
+            cur.execute(f"CREATE DATABASE {qi(db)}")
     finally:
         master.close()
     conn = connect(db)
