@@ -56,17 +56,23 @@ The loader preserves valid header names. Empty, duplicated, reserved, invalid, o
 
 ## Designing the user–agent workflow
 
-The project requirements were prompt-defined; this conversation did not include an iterative design discussion. The initial goal was to create Stage 1 of a SQL Server medallion warehouse from scratch on a Mac, with an explicit local loader, safe credential handling, Git/GitHub choices, and a human checkpoint before data load.
+The reusable project prompt was developed iteratively in the separate **Explore AI workflow automation** conversation. The build conversation then supplied the finalized, project-specific requirements; design iteration happened while shaping the prompt, before this project was created.
+
+The starting idea was broader than this Stage 1: explore how a Mac-based AI agent could turn a plan into a medallion warehouse workflow—from obtaining data and creating project/database structures through bronze validation, user-directed silver transformations, gold facts and dimensions, and generated architecture or star-schema diagrams. The discussion narrowed that into a repeatable project prompt with explicit inputs, bounded actions, and human review points. Stage 1 implements the setup and bronze foundation; the later transformations and diagram generation remain future workflow ideas.
+
+Earlier project attempts exposed practical handoff problems. The prompt was refined so a CSV attachment itself signals continuation without a separate “done” message, and so credential handling uses the existing container environment or a hidden prompt in a visible Mac Terminal. GitHub troubleshooting also showed that Codex’s restricted shell could report a saved keychain login as invalid; the prompt therefore calls for an elevated/local authentication check before asking the user to sign in again. These lessons informed the workflow requirements used here.
 
 | User input or decision | Agent action | Human checkpoint |
 |---|---|---|
+| Started with a broad plan to delegate warehouse setup and later modeling to an AI agent; refined it into a reusable staged workflow | Prompt defines project inputs, setup/loader actions, validation, future-stage boundaries, and review points | User supplies project-specific choices; agent pauses before the first data load |
+| Earlier attempts revealed confusing CSV handoffs and password prompts | Prompt treats an attachment as the continuation signal and confines password entry to a visible Terminal when needed | User attaches files or enters credentials locally; never needs to paste a password into chat |
+| Earlier GitHub checks sometimes failed inside a restricted shell despite a valid Mac keychain login | Prompt calls for an elevated/local check and a single recovery path if authentication is genuinely invalid | User signs in only if that check reports a real authentication failure |
 | Project name `ai_medallion_wh`, SQL Server/T-SQL, DBeaver, and existing container `sqlserver2025` | Scaffold targets that database and reuse-only container workflow | Review connection information; configure DBeaver manually |
 | Source folder paths for ERP and CRM | Copy six CSVs unchanged into nested `datasets/` folders; ignore local data in Git | Review preflight and proposed mappings before any load |
-| Mac-side Python loader and ODBC Driver 18 | Implement `pyodbc` scripts and process-local OpenSSL handling | Run from visible Terminal only if hidden password input is unavailable |
-| Support nested/multiple CSVs and preserve bronze history | Derive table names, hash files, validate fields, and use a load ledger | One review checkpoint covers all files |
-| Public GitHub repository | Keep datasets excluded pending redistribution permission; prepare local Git | GitHub authentication and repository/push status are to be reported after checks |
+| Mac-side Python loader, ODBC Driver 18, nested CSV support, and bronze history preservation | Implement `pyodbc` scripts, process-local OpenSSL handling, deterministic mappings, hashes, and the load ledger | One review checkpoint covers all files; later silver/gold business choices remain user-directed |
+| Public GitHub repository | Exclude local datasets because redistribution permission was not established; commit and push the scaffold | GitHub status is checked before publishing; DBeaver remains a manual user setup |
 
-The intended human review checkpoint is after scaffold, setup, and complete preflight but before bronze table creation or CSV loading. No troubleshooting outcome or approval is claimed here.
+The human review checkpoint for this build was after scaffold, database/schema setup, and complete preflight, before bronze tables and CSV data were created. The user later ran the loader; a cursor handling error was fixed, after which all six files loaded and validated. The loader is deterministic and does not call an AI model at runtime. The agent carried out prompt-bounded setup and ingestion; the user defined the workflow, supplied project inputs and datasets, and controlled the data-load handoff.
 
 ## Implemented and future work
 
