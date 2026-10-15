@@ -1,0 +1,9 @@
+.venv/
+.env
+*.log
+__pycache__/
+*.py[cod]
+.DS_Store
+datasets/**/*.csv
+datasets/*.csv
+!datasets/README.md
